@@ -1,0 +1,42 @@
+{
+  "name": "let-us-chat",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "run-p type-check build-only",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
+  },
+  "dependencies": {
+    "loadsh": "^0.0.4",
+    "moment": "^2.29.4",
+    "pinia": "^2.1.4",
+    "recorder-core": "^1.2.23070100",
+    "socket.io-client": "^4.7.2",
+    "vue": "^3.3.4",
+    "vue-clipboard3": "^2.0.0",
+    "vue-router": "^4.2.4",
+    "vue3-emoji-picker": "^1.1.7"
+  },
+  "devDependencies": {
+    "@tsconfig/node18": "^18.2.0",
+    "@types/mockjs": "^1.0.7",
+    "@types/node": "^18.17.0",
+    "@vicons/ionicons5": "^0.12.0",
+    "@vicons/utils": "^0.1.4",
+    "@vitejs/plugin-vue": "^4.2.3",
+    "@vitejs/plugin-vue-jsx": "^3.0.2",
+    "@vue/tsconfig": "^0.4.0",
+    "mockjs": "^1.1.0",
+    "naive-ui": "^2.34.4",
+    "npm-run-all": "^4.1.5",
+    "typescript": "~5.1.6",
+    "unplugin-auto-import": "^0.16.6",
+    "unplugin-vue-components": "^0.25.1",
+    "vfonts": "^0.0.3",
+    "vite": "^4.4.6",
+    "vue-tsc": "^1.8.6"
+  }
+}
