@@ -1,6 +1,8 @@
 import type { Socket } from "socket.io-client";
 import Recorder from 'recorder-core/recorder.mp3.min'
 import type { CUser, SMessage } from "@/types/CMessage";
+import { createDiscreteApi } from "naive-ui";
+const { message } = createDiscreteApi(['message'])
 var socket: Socket | undefined = undefined;
 var rec: any;
 var realTimeSendTryType: any;
@@ -12,12 +14,14 @@ var realTimeSendTryChunk: any;
 var SendInterval = 300;
 var testSampleRate = 16000;
 var testBitRate = 16;
-export const recOpen = (type: string, socket_: any, sendUser: CUser) => {
+export const recOpen = (type: string, socket_: any, room: string) => {
     console.log("recOpen");
-
+    if(!socket_){
+        message.error('服务器未响应')
+    }
     if (!socket) {
         socket = socket_;
-    }
+    } 
     if (rec) {
         rec.close();
     }
@@ -29,7 +33,7 @@ export const recOpen = (type: string, socket_: any, sendUser: CUser) => {
             __: any,
             bufferSampleRate: any
         ) {
-            RealTimeSendTry(buffers, bufferSampleRate, false, sendUser);
+            RealTimeSendTry(buffers, bufferSampleRate, false, room);
         },
     });
     rec.open(
@@ -39,7 +43,7 @@ export const recOpen = (type: string, socket_: any, sendUser: CUser) => {
         },
         function (msg:any, isUserNotAllow:any) {
             console.log(msg, isUserNotAllow);
-            
+            message.error(msg);
         }
     );
     RealTimeSendTryReset(type);
@@ -58,7 +62,7 @@ const RealTimeSendTry = (
     buffers: any,
     bufferSampleRate: any,
     isClose: boolean,
-    sendUser: CUser
+    room: string
 ) => {
     var t1 = Date.now();
     if (realTimeSendTryTime == 0) {
@@ -102,7 +106,7 @@ const RealTimeSendTry = (
 
     //没有新数据，或结束时的数据量太小，不能进行mock转码
     if (pcm.length == 0 || (isClose && pcm.length < 2000)) {
-        TransferUpload(number, null, 0, null, isClose, sendUser);
+        TransferUpload(number, null, 0, null, isClose, room);
         return;
     }
 
@@ -126,7 +130,7 @@ const RealTimeSendTry = (
         function (blob: any, duration: number) {
             realTimeSendTryEncBusy && realTimeSendTryEncBusy--;
             blob.encTime = Date.now() - encStartTime;
-            TransferUpload(number, blob, duration, recMock, isClose, sendUser);
+            TransferUpload(number, blob, duration, recMock, isClose, room);
         },
         function (msg: any) {
             realTimeSendTryEncBusy && realTimeSendTryEncBusy--;
@@ -140,7 +144,7 @@ const TransferUpload = (
     duration: any,
     blobRec: any,
     isClose: boolean,
-    sendUser: CUser
+    room: string
 ) => {
     transferUploadNumberMax = Math.max(transferUploadNumberMax, number);
     if (blobOrNull) {
@@ -149,7 +153,7 @@ const TransferUpload = (
         socket?.emit("audioStream", {
             type: "audioStream",
             data: blob,
-            extra: sendUser,
+            extra: room,
         } as SMessage);
     }
     if (isClose) {

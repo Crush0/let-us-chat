@@ -8,13 +8,13 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Emoji: typeof import('./src/components/bar/emoji.vue')['default']
-    Input: typeof import('./src/components/Input.vue')['default']
     InputLayout: typeof import('./src/components/InputLayout.vue')['default']
     Item: typeof import('./src/components/chat/Item.vue')['default']
     MessageItem: typeof import('./src/components/chat/MessageItem.vue')['default']
     MessageLayout: typeof import('./src/components/MessageLayout.vue')['default']
     MessageMenu: typeof import('./src/components/MessageMenu.vue')['default']
     My: typeof import('./src/components/My.vue')['default']
+    MyUserSetting: typeof import('./src/components/settings/MyUserSetting.vue')['default']
     NAvatar: typeof import('naive-ui')['NAvatar']
     NButton: typeof import('naive-ui')['NButton']
     NCard: typeof import('naive-ui')['NCard']
@@ -22,6 +22,7 @@ declare module 'vue' {
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
     NewBrand: typeof import('./src/components/newBrand.vue')['default']
     NForm: typeof import('naive-ui')['NForm']
+    NFormItem: typeof import('naive-ui')['NFormItem']
     NFormItemRow: typeof import('naive-ui')['NFormItemRow']
     NGlobalStyle: typeof import('naive-ui')['NGlobalStyle']
     NIcon: typeof import('naive-ui')['NIcon']
@@ -29,6 +30,10 @@ declare module 'vue' {
     NMenu: typeof import('naive-ui')['NMenu']
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
     NModal: typeof import('naive-ui')['NModal']
+    NSelect: typeof import('naive-ui')['NSelect']
+    NSwitch: typeof import('naive-ui')['NSwitch']
+    NTabPane: typeof import('naive-ui')['NTabPane']
+    NTabs: typeof import('naive-ui')['NTabs']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Settings: typeof import('./src/components/Settings.vue')['default']
@@ -37,5 +42,6 @@ declare module 'vue' {
     UseSocket: typeof import('./src/components/useSocket.vue')['default']
     Voice: typeof import('./src/components/bar/voice.vue')['default']
     VoiceChat: typeof import('./src/components/VoiceChat.vue')['default']
+    VoiceSetting: typeof import('./src/components/settings/VoiceSetting.vue')['default']
   }
 }

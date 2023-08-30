@@ -3,13 +3,17 @@ import timeFotmat from '@/utils/timeFormat'
 import type { CMessage, CUser, Mtype } from '@/types/CMessage';
 import { Trash } from '@vicons/ionicons5';
 import { Icon } from '@vicons/utils';
+import { getAvatarFile } from '@/utils/header';
+import { useDialog } from 'naive-ui';
+import { useUserStore } from '@/stores/userConfig';
 interface UserCardProps {
     username: string,
     uuid: string,
     active: boolean,
     unread: number,
     newMsg: CMessage,
-    online: boolean
+    online: boolean,
+    avatar: string
 }
 
 const props = withDefaults(defineProps<UserCardProps>(), {
@@ -18,6 +22,7 @@ const props = withDefaults(defineProps<UserCardProps>(), {
     online: false,
     unread: 0,
     uuid: '',
+    avatar: '',
     newMsg: () => ({
         sender: {
             name: '',
@@ -30,31 +35,54 @@ const props = withDefaults(defineProps<UserCardProps>(), {
 
     })
 })
+const dialog = useDialog()
+const userStore = useUserStore()
+const deleteUser = () => {
+    dialog.warning({
+          title: '警告',
+          content: '你确定要删除该离线用户吗，所有的历史记录将被删除',
+          positiveText: '确定',
+          negativeText: '再等等',
+          onPositiveClick: () => {
+            userStore.removeUser({
+                uuid: props.uuid,
+            } as CUser)
+          },
+        })
+}
 
 </script>
 
 <template>
     <div class="side-menu">
         <a href="javascript:void(0);" class="menu-item" :class="{ active }">
-            <n-avatar size="small" :class="{ online: props.online }" class="avatar">
-                {{ props.username.slice(0, 2) }}
-            </n-avatar>
+            <n-avatar size="small" :class="{ offline: !props.online }" class="avatar"
+                :src="getAvatarFile(props.avatar).href" :render-fallback="() => props.username.slice(0, 2)" />
             <div class="desc">
                 <span class="uname">{{ props.username }}<span class="uuid">#{{ props.uuid.slice(0, 4) }}</span></span>
-                <span class="content">{{ newMsg.content && newMsg.mtype.name === 'text' ? newMsg.content : (newMsg.mtype.name === 'image'? '[图片]': '&nbsp;') }}</span>
+                <span class="content">{{ newMsg.content && newMsg.mtype.name === 'text' ? newMsg.content :
+                    (newMsg.mtype.name === 'image' ? '[图片]' : '&nbsp;') }}</span>
             </div>
             <div class="updates">
-                <span v-if="unread > 0" class="time">{{ timeFotmat.getLastChatTime(newMsg.time) }}</span>
+                <span v-if="newMsg.time" class="time">{{ timeFotmat.getLastChatTime(newMsg.time) }}</span>
                 <span v-if="unread > 0" class="notification-number">{{ unread > 99 ? '99+' : unread }}</span>
+                <n-button @click.stop="deleteUser" v-if="!props.online" class="trash-icon" type="error" quaternary round>
+                    <template #icon>
+                        <n-icon>
+                            <Trash />
+                        </n-icon>
+                    </template>
+                </n-button>
             </div>
         </a>
     </div>
 </template>
 
 <style scoped>
-.menu-item{
+.menu-item {
     height: 100%;
 }
+
 .side-menu {
     display: flex;
     flex-direction: column;
@@ -74,13 +102,22 @@ const props = withDefaults(defineProps<UserCardProps>(), {
     border-radius: 6px;
     transition: 0.3s;
 }
-.uuid{
+
+.uuid {
     color: #666;
     font-size: 8px;
 }
 
-.online {
-    background-color: green;
+.offline {
+    filter: grayscale(1);
+}
+
+.trash-icon {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
 }
 
 .side-menu a:hover,
@@ -101,6 +138,12 @@ const props = withDefaults(defineProps<UserCardProps>(), {
 
 .uname {
     margin-left: 8px;
+    font-size: 12px;
+    max-width: 60px;
+    /** 超出省略号 */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .content {

@@ -1,14 +1,14 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+// import { createRouter, createWebHistory } from 'vue-router'
 
-const router = createRouter({
-  history: createWebHashHistory('/let-us-chat/'),
-  routes: [
-    {
-      path: '/',
-      name: 'chat',
-      component: () => import ('../views/ChatRoomView.vue')
-    },
-  ]
-})
+// const router = createRouter({
+//   history: createWebHistory(import.meta.env.BASE_URL),
+//   routes: [
+//     {
+//       path: '/',
+//       name: 'chat',
+//       component: () => import ('../views/ChatRoomView.vue')
+//     },
+//   ]
+// })
 
-export default router
+// export default router

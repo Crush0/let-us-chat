@@ -14,10 +14,12 @@ const emojiVisible = ref(false)
 </script>
 
 <template>
-    <div class="emoji-picker" @click="emojiVisible = !emojiVisible">
-        <Icon >
-            <HappySharp />
-        </Icon>
+    <div class="emoji-picker">
+        <div class="btn" @click="emojiVisible = !emojiVisible">
+            <Icon>
+                <HappySharp />
+            </Icon>
+        </div>
         <div class="picker">
             <Transition>
                 <EmojiPicker @mouseleave="emojiVisible = false" v-show="emojiVisible" :disable-skin-tones="true"
@@ -37,6 +39,11 @@ const emojiVisible = ref(false)
     height: 100%;
 }
 
+.btn{
+    width: 100%;
+    height: 100%;
+}
+
 .picker {
     position: absolute;
     bottom: 150%;
@@ -49,13 +56,14 @@ const emojiVisible = ref(false)
 .picker:deep(.v3-emoji-picker .v3-body .v3-body-inner .v3-group .v3-emojis button span) {
     color: var(--v3-picker-fg);
 }
+
 .v-enter-active,
 .v-leave-active {
-  transition: opacity 0.2s ease;
+    transition: opacity 0.2s ease;
 }
 
 .v-enter-from,
 .v-leave-to {
-  opacity: 0;
+    opacity: 0;
 }
 </style>

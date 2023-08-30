@@ -61,7 +61,7 @@ const updateScroll = () => {
 //     }
 // })
 
-
+defineExpose({updateScroll})
 </script>
 
 <template>

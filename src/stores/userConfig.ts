@@ -11,6 +11,7 @@ export const useUserStore = defineStore("userStore", {
             uuid: '-1',
             name: '大家的聊天室',
             messages: [] as CMessage[],
+            type: 'group'
         } as CUser];
         return {
             myUser,
@@ -28,6 +29,22 @@ export const useUserStore = defineStore("userStore", {
     actions: {
         setMyUser(user: CUser) {
             this.myUser = user;
+        },
+        updateMyUser(user: CUser){
+            this.myUser = {
+                ...this.myUser,
+                ...user
+            }
+        },
+        updateUser(user:CUser) {
+            const index = this.userList.findIndex((u) => u.uuid === user.uuid);
+            if(index !== -1){
+                const findUser = this.userList[index]
+                this.userList[index] = {
+                    ...findUser,
+                    ...user
+                };
+            }
         },
         userOffline(offlineUser:CUser){
             // 用户下线
@@ -91,9 +108,17 @@ export const useUserStore = defineStore("userStore", {
                 const group = this.userList.find((user) => user.uuid === receiver.uuid)
                 group?.messages?.push(message);
             } else {
-                const index = this.userList.findIndex((user) => user.uuid === sender.uuid)
-                const user = this.userList[index];
-                user?.messages?.push(message);
+                if(sender.uuid === this.myUser.uuid){
+                    const index = this.userList.findIndex((user) => user.uuid === receiver?.uuid)
+                    const user = this.userList[index];
+                    user?.messages?.push(message);
+                    
+                } else {
+                    const index = this.userList.findIndex((user) => user.uuid === sender?.uuid)
+                    const user = this.userList[index];
+                    user?.messages?.push(message);
+                }
+                
             }
         },
     },

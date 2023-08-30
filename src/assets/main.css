@@ -5,6 +5,18 @@
     box-sizing: border-box;
 }
 
+
+button,
+a,
+input,
+textarea {
+    -webkit-app-region: no-drag;
+}
+
+.noDrag {
+    -webkit-app-region: no-drag;
+}
+
 :root {
     --theme-bg-color: rgba(16 18 27 / 40%);
     --border-color: rgba(113 119 144 / 25%);
@@ -21,6 +33,7 @@
     --search-bg: #14162b;
     --overlay-bg: rgba(36, 39, 59, 0.3);
     --scrollbar-bg: rgb(1 2 3 / 40%);
+    /* --n-color: rgba(36, 39, 59, 0.3)!important; */
 }
 
 ::-webkit-scrollbar {
@@ -32,33 +45,42 @@
     background: var(--scrollbar-bg);
     border-radius: 10px;
 }
+
 /* 来电抖动 */
 @keyframes btn-shake-circle {
     0% {
         transform: rotate(0deg);
     }
+
     10% {
         transform: rotate(10deg);
     }
+
     20% {
         transform: rotate(-10deg);
     }
+
     30% {
         transform: rotate(10deg);
     }
+
     40% {
         transform: rotate(-10deg);
     }
+
     50% {
         transform: rotate(10deg);
     }
+
     60% {
         transform: rotate(-10deg);
     }
+
     70% {
         transform: rotate(10deg);
     }
-    100%{
+
+    100% {
         transform: rotate(0deg);
     }
 }

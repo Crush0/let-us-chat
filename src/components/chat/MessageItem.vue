@@ -9,6 +9,7 @@ const { toClipboard } = useClipboard();
 import { useDialog } from 'naive-ui'
 const message = useMessage()
 import { NImage } from 'naive-ui';
+import { getAvatarFile } from '@/utils/header';
 interface MessageItemProps {
     message: CMessage
 }
@@ -74,9 +75,7 @@ const deleteMsg = () => {
 
 <template>
     <div :class="{ 'mine': isMineMsg }" class="message-item">
-        <n-avatar class="avatar" size="small">
-            {{ props.message.sender.name.slice(0, 2) }}
-        </n-avatar>
+        <n-avatar class="avatar" round size="small" :src="getAvatarFile(props.message.sender.avatar).href" :render-fallback="() => props.message.sender.name.slice(0, 2)"/>
         <div class="wapper">
             <div class="uname">
                 {{ props.message.sender.name }}<span class="uid">#{{ props.message.sender.uuid?.slice(0, 4) }}

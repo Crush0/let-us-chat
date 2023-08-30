@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
 import useSocket from './components/useSocket.vue';
 import videoBG from '@/assets/7btrrd.mp4'
 import { overrideTheme } from '@/customTheme'
+import ChatRoomViewVue from './views/ChatRoomView.vue';
 </script>
 
 <template>
@@ -17,7 +17,7 @@ import { overrideTheme } from '@/customTheme'
         <n-dialog-provider>
           <use-socket>
             <div class="app-container" @contextmenu.prevent="() => { return false }">
-              <RouterView />
+              <ChatRoomViewVue />
             </div>
           </use-socket>
         </n-dialog-provider>
@@ -54,15 +54,14 @@ import { overrideTheme } from '@/customTheme'
 
 .app-container {
   background-color: var(--theme-bg-color);
-  max-width: 1250px;
-  max-height: 860px;
+  /* max-width: 1250px;
+  max-height: 860px; */
   height: fit-content;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
   width: 100%;
-  border-radius: 14px;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   font-size: 15px;

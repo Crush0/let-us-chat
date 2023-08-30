@@ -9,6 +9,7 @@ import type { Socket } from 'socket.io-client';
 import { inject, ref, watch, type Ref } from 'vue';
 import rtc from '@/utils/rtc'
 import { playCalling, processBuffer } from '@/utils/audioPlay';
+import { getAvatarFile } from '@/utils/header';
 const props = defineProps<{ user: CUser | null }>();
 const emits = defineEmits(['update:user'])
 const voiceOption = ref({
@@ -109,11 +110,12 @@ const handleCallBtn = () => {
                 sender: sender.value
             } as CMessage
         })
+        const roomName = `${sender.uuid}-${receiver.uuid}`;
         voiceOption.value.status = VoiceState.inCall;
         voiceOption.value.startTime = new Date();
         addVoiceHandler(VoiceEvent.audioStream,processBuffer)
         if (props.user) {
-            rtc.recOpen('mp3', voiceSocket.value, props.user)
+            rtc.recOpen('mp3', voiceSocket.value, roomName)
         }
 
     }
@@ -157,14 +159,15 @@ addVoiceHandler('reject', (data: any) => {
     } as CUser)
     
 })
-addVoiceHandler(VoiceEvent.acceptCall, (_: any) => {
+addVoiceHandler(VoiceEvent.acceptCall, (msg: any) => {
+    const roomName = msg.extra
     // 对方接受了聊天请求
     voiceOption.value.status = VoiceState.inCall
     voiceOption.value.startTime = new Date();
     console.log('对方接受了聊天请求');
     addVoiceHandler(VoiceEvent.audioStream,processBuffer)
-    if (props.user) {
-        rtc.recOpen('mp3', voiceSocket.value, props.user)
+    if (roomName) {
+        rtc.recOpen('mp3', voiceSocket.value, roomName)
     }
     if(stopCalling.value){
         stopCalling.value.call(undefined)
@@ -187,7 +190,6 @@ addVoiceHandler(VoiceEvent.hangUp, () => {
         stopCalling.value.call(undefined)
         stopCalling.value = null
     }
-    console.log('挂断');
     removeVoiceHandler(VoiceEvent.audioStream)
     // 对方挂断 | 拒绝
     setTimeout(() => {
@@ -195,7 +197,7 @@ addVoiceHandler(VoiceEvent.hangUp, () => {
     }, 1000)
     emits('update:user', {
         uuid: '-1000',
-        name: '位置用户',
+        name: '未知用户',
         type: 'user'
     } as CUser)
     voiceOption.value.status = VoiceState.disconnected
@@ -224,9 +226,7 @@ defineExpose({ show, startChat, hide })
                         <div class="d-d_container_header">{{ user?.name ?? '语音聊天' }}</div>
                         <div class="d-d_container_content">
                             <div class="user-header">
-                                <n-avatar class="user-avatar" :src="user?.avatar">
-                                    {{ user?.name.slice(0, 2) }}
-                                </n-avatar>
+                                <n-avatar size="small" class="avatar" :src="getAvatarFile(props.user?.avatar).href" :render-fallback="() => props.user?.uuid && props.user?.uuid.slice(0, 2)"/>
                                 <div class="user-name">
                                     {{ user?.name ?? '未知用户' }}
                                 </div>
@@ -307,8 +307,8 @@ defineExpose({ show, startChat, hide })
 }
 
 .show-panel-btn {
-    top: 20px;
-    right: 20px;
+    top: 15px;
+    right: 160px;
     width: 50px;
     height: 50px;
 

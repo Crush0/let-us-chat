@@ -1,6 +1,6 @@
 import io, { Socket, type ManagerOptions, type SocketOptions } from 'socket.io-client';
 
-const URL = 'http://127.0.0.1:3000/chat';
+const URL = 'http://124.220.65.47:3002/chat';
 
 var socket: Socket | null = null
 

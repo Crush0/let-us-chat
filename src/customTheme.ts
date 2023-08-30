@@ -5,6 +5,10 @@ export const overrideTheme: GlobalThemeOverrides = {
         fontFamily: '"Poppins", sans-serif',
         textColor1: 'var(--theme-color)',
         textColor2: 'var(--theme-color)',
+        inputColor: 'var(--search-bg)',
+        borderColor: 'var(--border-color)',
+        hoverColor: 'var(--border-color)',
+        popoverColor: 'rgb(12,15,25)'
     },
     Button: {
         colorPrimary: '#3a6df0',
@@ -23,7 +27,8 @@ export const overrideTheme: GlobalThemeOverrides = {
         border: '1px solid rgba(194, 194, 194, 0.34)',
         borderFocus: '1px solid rgba(194, 194, 194, 0.65)',
         borderHover: '1px solid rgba(194, 194, 194, 0.65)',
-        boxShadowFocus: '0 0 0 2px rgba(134, 140, 160, 0.02)'
+        boxShadowFocus: '0 0 0 2px rgba(134, 140, 160, 0.02)',
+        colorDisabled: 'var(--search-bg)'
     },
     Message: {
         colorError: 'rgb(22,25,37)',

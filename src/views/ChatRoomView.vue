@@ -4,18 +4,23 @@ import UserCard from '@/components/UserCard.vue'
 import My from '@/components/My.vue'
 import InputLayout from '@/components/InputLayout.vue';
 import { useUserStore } from '@/stores/userConfig';
-import type { CMessage, CUser } from '@/types/CMessage';
+import type { CMessage, CUser, SMessage } from '@/types/CMessage';
 import { useMessage } from 'naive-ui';
 import VoiceChat from '@/components/VoiceChat.vue'
 import { playNotice } from '@/utils/audioPlay';
 import { NEmpty } from 'naive-ui';
 import { VoiceEvent } from '@/types/VoiceEnum';
+import { MinimizeRound, FullscreenRound,CloseRound } from '@vicons/material'
+import { addHandler } from '@/ws/chatSocket';
+import { useGolBalConfigStore } from '@/stores/golbalConfig';
 const title = ref("Let's talk!")
 const messages: Ref<CMessage[]> = ref([])
 const message = useMessage()
 const userStore = useUserStore()
 const userList = computed(() => userStore.getAllUser)
 const nowSelect: Ref<CUser> = ref({} as CUser)
+const golbalStore = useGolBalConfigStore()
+const messageLayout:any = ref(null)
 userStore.$onAction(({
     name,
     args,
@@ -33,8 +38,6 @@ userStore.$onAction(({
             } else {
                 if (msg.receiver?.uuid === '-1') {
                     const group: any = userList.value.find((u: CUser) => u.uuid === msg.receiver?.uuid)
-                    console.log(group);
-
                     if (group) {
                         if (!group.unread) {
                             group.unread = 0
@@ -52,12 +55,18 @@ userStore.$onAction(({
                         }
                     }
                 }
-                if (msg.mtype.name !== 'info') {
+                if (msg.mtype.name !== 'info' && golbalStore.getNoticePlay) {
                     playNotice()
                 }
             }
         }
     })
+})
+
+addHandler('updateUser', (data:SMessage) => {
+    console.log(data);
+    
+    userStore.updateUser(data.data)
 })
 
 const checkTime = (msg0: CMessage, msg1: CMessage) => {
@@ -89,28 +98,35 @@ const insertMsg = (msg: CMessage) => {
     })
 }
 
-const userSelect = (_: any, user: CUser) => {
-    if (nowSelect.value?.uuid === user.uuid) return;
-    title.value = user.name
-    nowSelect.value = user
-    messages.value = [];
-    user.unread = 0
-    userStore.getUserMsg(nowSelect.value).forEach((msg: CMessage) => {
-        if (msg.receiver && msg.receiver.uuid === userStore.getMyUser.uuid) {
-            insertMsg(msg)
-        } else if (nowSelect.value.uuid === '-1' && msg.receiver && msg.receiver.uuid === '-1') {
-            insertMsg(msg)
+const userSelect = (_: any, user_: CUser) => {
+    if (nowSelect.value?.uuid === user_.uuid) return;
+    if (user_.uuid) {
+        const user = userStore.getUserByUUID(user_.uuid)
+        if (user) {
+            title.value = user.name
+            nowSelect.value = user
+            messages.value = [];
+            user.unread = 0
+            userStore.getUserMsg(nowSelect.value).forEach((msg: CMessage) => {
+                insertMsg(msg)
+                // if (msg.receiver && msg.receiver.uuid === userStore.getMyUser.uuid) {
+                //     insertMsg(msg)
+                // } else if (nowSelect.value.uuid === '-1' && msg.receiver && msg.receiver.uuid === '-1') {
+                //     insertMsg(msg)
 
+                // }
+            })
         }
-    })
+
+    }
+
 }
 
 const voiceChat: any = ref(null)
-
+const group = ref(userStore.getUserByUUID('-1'))
 const unread = computed(() => {
-    const group = userStore.getUserByUUID('-1')
-    if (group && group.unread) {
-        return group.unread
+    if (group.value && group.value.unread) {
+        return group.value.unread
     } else {
         return 0
     }
@@ -126,15 +142,28 @@ const onCallSend = (user: CUser) => {
     if (chatUser.value?.uuid === '-1000') {
         chatUser.value = user
         voiceChat.value?.show()
-        voiceChat.value?.startChat(VoiceEvent.initiateCall,{
+        voiceChat.value?.startChat(VoiceEvent.initiateCall, {
             sender: userStore.getMyUser,
-            receiver: user
+            receiver: chatUser.value
         })
     } else {
         message.error('有未处理的通话，无法开启新的通话')
     }
 
 }
+const window_:any = window
+const minimize = () => {
+    window_.windowSize.minimize()
+}
+
+const fullScreen = () => {
+    window_.windowSize.maxsize()
+}
+
+const closeWin = () => {
+    window_.windowSize.close()
+}
+
 </script>
 
 <template>
@@ -143,9 +172,37 @@ const onCallSend = (user: CUser) => {
         <div class="header">
             <div class="menu-circle"></div>
             <div class="menu-title">
-                {{ title }}
+                {{ title }}<span v-if="nowSelect.type !== 'group'" style="font-size: 12px; color:#666 ">#{{ nowSelect.uuid?.slice(0,4) }}</span>
             </div>
-            <My />
+            <div class="win-btn-group" v-if="window_.windowSize">
+                <div class="win-btn">
+                    <n-button circle size="tiny" type="primary" @click="minimize">
+                        <template #icon>
+                            <n-icon>
+                                <MinimizeRound />
+                            </n-icon>
+                        </template>
+                    </n-button>
+                </div>
+                <div class="win-btn">
+                    <n-button circle size="tiny" type="primary" @click="fullScreen">
+                        <template #icon>
+                            <n-icon>
+                                <FullscreenRound />
+                            </n-icon>
+                        </template>
+                    </n-button>
+                </div>
+                <div class="win-btn">
+                    <n-button circle size="tiny" type="error" @click="closeWin">
+                        <template #icon>
+                            <n-icon>
+                                <CloseRound />
+                            </n-icon>
+                        </template>
+                    </n-button>
+                </div>
+            </div>
         </div>
         <div class="wrapper">
             <div class="left-side">
@@ -176,11 +233,11 @@ const onCallSend = (user: CUser) => {
                         </a>
                     </div>
                 </div>
-                <div class="side-wrapper">
+                <div class="side-wrapper" style="height: calc(100% - 160px);">
                     <div class="side-title">用户列表</div>
                     <template v-if="userList.length > 1">
                         <template v-for="user in userList" :key="user.uuid">
-                            <UserCard v-if="user.type === 'user'" :unread="user.unread" :online="user.online"
+                            <UserCard v-if="user.type === 'user'" :unread="user.unread" :online="user.online" :avatar="user.avatar"
                                 :uuid="user.uuid"
                                 :new-msg="user.messages ? user.messages[user.messages?.length - 1] : {} as CMessage"
                                 :username="user.name" :active="nowSelect.uuid === user.uuid" @click="userSelect($el, user)">
@@ -188,13 +245,17 @@ const onCallSend = (user: CUser) => {
                         </template>
                     </template>
                     <template v-else>
-                        <n-empty style="margin-top: 50px;" description="这里还没有小伙伴"></n-empty>
+                        <n-empty style="margin-top: 50px;" description="这里还没有小伙伴"/>
                     </template>
                 </div>
+                <div class="side-wrapper side-my">
+                    <My />
+                </div>
+
             </div>
             <div class="main-container">
-                <MessageLayout :messages="messages" :nowSelect="nowSelect" />
-                <InputLayout :receiver="nowSelect" @onCallSend="onCallSend" />
+                <MessageLayout ref="messageLayout" :messages="messages" :nowSelect="nowSelect" />
+                <InputLayout :receiver="nowSelect" @onCallSend="onCallSend" @submit="messageLayout?.updateScroll" />
             </div>
         </div>
     </div>
@@ -202,22 +263,42 @@ const onCallSend = (user: CUser) => {
 
 <style scoped>
 .chat-room-view {
-    width: 65vw;
-    height: 80vh;
+    /* width: 65vw; */
+    /* height: 80vh; */
     display: flex;
+    width: 100vw;
+    height: 100vh;
     flex-direction: column;
 }
 
 .header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     flex-shrink: 0;
     height: 58px;
     width: 100%;
     border-bottom: 1px solid var(--border-color);
     padding: 0 30px;
     white-space: nowrap;
+    -webkit-app-region: drag;
+    z-index: 9999;
+}
+.header .win-btn-group{
+    z-index: 9999;
+    display: flex;
+    flex-direction: row;
+    width: 80px;
+    justify-content: center;
+    position: absolute;
+    right: 10px;
+}
+.header .win-btn-group .win-btn{
+    margin: 0 4px;
+    z-index: 9999;
+}
+.header .win-btn-group .win-btn:first-child:deep(.n-icon) {
+    bottom: 4px;
 }
 
 @media screen and (max-width: 480px) {
@@ -235,6 +316,7 @@ const onCallSend = (user: CUser) => {
     box-shadow: 24px 0 0 0 #f8ce52, 48px 0 0 0 #5fcf65;
     margin-right: 195px;
     flex-shrink: 0;
+    z-index: 9999;
 }
 
 .updates {
@@ -245,6 +327,14 @@ const onCallSend = (user: CUser) => {
     width: 18px;
     height: 18px;
     font-size: 11px;
+}
+
+.side-my {
+    display: flex;
+    width: 100%;
+    height: 70px;
+    align-items: center;
+    justify-content: center;
 }
 
 .notification-number {
@@ -290,6 +380,7 @@ const onCallSend = (user: CUser) => {
 }
 
 .side-wrapper+.side-wrapper {
+    overflow: auto;
     margin-top: 20px;
 }
 
